@@ -21,11 +21,12 @@ class Player(pygame.sprite.Sprite):
             pass
         elif keys[pygame.K_LEFT]:
             pass
-    def restrictmovement(self):
-        if self.rect.right >= self.xplusconstraint:
-            self.rect.right = self.xplusconstraint
-        elif self.rect.left <= self.xminusconstraint:
-            self.rect.left = self.xminusconstraint
-    def update(self):
+    def restrictmovement(self,leftconstraint,rightconstraint):
+        if self.rect.right >= rightconstraint:
+            self.rect.right = rightconstraint
+        elif self.rect.left <= leftconstraint:
+            self.rect.left = leftconstraint
+    def update(self,leftconstraint,rightconstraint):
         self.get_input()
+        self.restrictmovement(leftconstraint,rightconstraint)
         self.rect.midbottom = (self.position.x, self.position.y)
