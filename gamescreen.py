@@ -13,7 +13,7 @@ class GameScreen:
         self.gamewindow = pygame.Rect(self.left,self.top,self.gamewindowwidth,self.gamewindowheight)
     def draw(self):
         self.gamewindow = pygame.Rect(self.left,self.top,self.gamewindowwidth,self.gamewindowheight)
-        self.gamewindow = pygame.draw.rect(self.screen,"white",self.gamewindow,1)
+        self.gamewindow = pygame.draw.rect(self.screen,"white",self.gamewindow,2)
         scoredisplay = self.font.render(f"Score {self.score}",True,"white")
         scorerect = scoredisplay.get_rect()
         scorerect.midleft = (20,50)
