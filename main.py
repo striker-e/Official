@@ -85,7 +85,7 @@ if __name__ == "__main__":
     running = False
     clock = pygame.time.Clock()
     while True:
-        if running == False:
+        if running == False and pausestate == False:
             game = Game(base_width,base_height)
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -103,32 +103,25 @@ if __name__ == "__main__":
                     mainmenu.change(True)
                 elif event.key == pygame.K_i:
                     mainmenu.change(False)
-                elif event.key == pygame.K_RETURN and mainmenu.index == 0:
+                elif event.key == pygame.K_RETURN and mainmenu.index == 0 and pausestate == False:
                     running = True
+                elif event.key == pygame.K_RETURN and pausestate == True:
+                    running = False
+                    pausestate = False
+                elif event.key == pygame.K_BACKSPACE and pausestate == True:
+                    running = True
+                    pausestate = False
                 elif event.key == pygame.K_ESCAPE:
                     running = False
                 elif running and event.key == pygame.K_p:
                     pausestate = True
                     running = False
-                    while pausestate:
+                    if pausestate:
                         pausemenu.draw()
-                        if pausemenu.keychecker:
-                            print("case 1")
-                            running = False
-                            pausestate = False
-                            break
-                        elif not pausemenu.keychecker:
-                            print("case 2")
-                            running = True
-                            pausestate = False
-                            break
-                        elif pausemenu.keychecker == 2:
-                            print("case 3")
-                            continue
         if running and pausestate == False:
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0))
-        if running == False:
+        if running == False and pausestate == False:
             background = pygame.transform.scale(background, (width, height))
             screen.blit(background, (0,0))
             mainmenu.draw()
