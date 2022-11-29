@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_RETURN and pausestate == True: #Pause Menu key checks
                     running = False
                     pausestate = False
-                elif event.key == pygame.K_BACKSPACE and pausestate == True:
+                elif event.key == pygame.K_p and pausestate == True:
                     running = True
                     pausestate = False
                 elif event.key == pygame.K_ESCAPE:
