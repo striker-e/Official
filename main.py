@@ -13,8 +13,8 @@ class Game:
         self.height = height
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
         self.pos = self.gamescreen.gamewindow.midbottom
-        self.player = Player(self.pos)
-        self.player = pygame.sprite.GroupSingle(self.player)
+        self.playersprite = Player(self.pos)
+        self.player = pygame.sprite.GroupSingle(self.playersprite)
         self.aliens = pygame.sprite.Group()
         self.aliencreation(rows = 7, cols = 10)
         self.alien_direction = 1
@@ -57,14 +57,16 @@ class Game:
             self.alien_lasers.add(laser_sprite)
     def run(self): #Run Object, draws gamescreen, player,alien each update using each of the sprite update and draw functions.
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
-        self.player.sprite.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
+        self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
         self.aliens.update(self.alien_direction)
         self.aliencheckpos(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
         #self.alien_shoot()
         self.alien_lasers.update()
-        self.player.sprite.lasers.draw(displayscreen)
         displayscreen.fill("black")
         self.player.draw(displayscreen)
+        self.player.sprite.lasers.draw(displayscreen)
+        displayscreen.set_at((self.player.sprite.checker),"red") #For Testing Purposes
+        print(self.player.sprite.dir)
         self.aliens.draw(displayscreen)
         self.alien_lasers.draw(displayscreen)
         self.gamescreen.draw()

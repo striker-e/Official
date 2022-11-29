@@ -1,6 +1,7 @@
 import pygame
 from gamescreen import GameScreen
 from laser import Laser
+import math
 class Player(pygame.sprite.Sprite):
     def __init__(self,pos):
         super().__init__()
@@ -56,13 +57,15 @@ class Player(pygame.sprite.Sprite):
         self.position = pygame.Vector2(self.rect.midbottom)
         self.laserangle = self.dir
     def alignment(self):
-        self.center = pygame.Vector2(self.rect.center)
-        self.midpointoffset = pygame.Vector2()
-        self.midpointoffset.from_polar(((1/2 * self.base_image.get_height()),self.dir + 90))
-        self.spawnpoint = self.center + self.midpointoffset
+        center = pygame.Vector2()
+        radius = (self.base_image.get_height() - 5)/2
+        center.x,center.y = self.rect.center
+        self.spawnpoint = (center.x + (math.cos(((self.dir*-1) -90)/180 * math.pi) * radius),center.y + (math.sin(((self.dir*-1) -90)/180 * math.pi) * radius))
+        self.checker = int(self.spawnpoint[0]),int(self.spawnpoint[1])
     def shoot(self):
-        self.lasers.add(Laser(self.laserangle,8,self.spawnpoint))
+        self.lasers.add(Laser(self.laserangle,3,self.spawnpoint))
         self.lasers.update()
+        print("Dog")
     def restrictmovement(self,leftconstraint,rightconstraint):
         if self.rect.right > rightconstraint:
             self.rect.right = rightconstraint
