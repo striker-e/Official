@@ -25,6 +25,7 @@ class Laser(pygame.sprite.Sprite):
         self.pos.x += self.vec.x
         self.pos.y -= self.vec.y
         self.rect.center = self.pos.x,self.pos.y
+        self.mask = pygame.mask.from_surface(self.image)
         #self.destroy()
         
 class AlienLaser(pygame.sprite.Sprite):

@@ -11,13 +11,12 @@ class GameScreen:
         self.gamewindowwidth = self.width * 0.35
         self.gamewindowheight = self.height * 0.60
         self.gamewindow = pygame.Rect(self.left,self.top,self.gamewindowwidth,self.gamewindowheight)
+        self.rect = self.gamewindow
     def draw(self):
         self.gamewindow = pygame.Rect(self.left,self.top,self.gamewindowwidth,self.gamewindowheight)
         self.gamewindow = pygame.draw.rect(self.screen,"white",self.gamewindow,2)
         scoredisplay = self.font.render(f"Score {self.score}",True,"white")
         scorerect = scoredisplay.get_rect()
         scorerect.midleft = (20,50)
-        self.screen.blit(scoredisplay,scorerect)    
-    def update(self):
-        self.draw()
-        
+        self.screen.blit(scoredisplay,scorerect)  
+        self.mask = pygame.mask.Mask(self.gamewindow.size, True)

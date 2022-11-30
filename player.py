@@ -56,10 +56,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = oldcenter
         self.position = pygame.Vector2(self.rect.midbottom)
         self.laserangle = self.dir
-    def alignment(self):
+    def alignment(self): #Use circle mathematics to get the spawnpoint of the laser to the tip
         center = pygame.Vector2()
         radius = (self.base_image.get_height() - 5)/2
-        center.x,center.y = self.rect.center
+        center.x,center.y = self.rect.center 
         self.spawnpoint = (center.x + (math.cos(((self.dir*-1) -90)/180 * math.pi) * radius),center.y + (math.sin(((self.dir*-1) -90)/180 * math.pi) * radius))
         self.checker = int(self.spawnpoint[0]),int(self.spawnpoint[1])
     def shoot(self):

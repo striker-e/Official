@@ -8,6 +8,7 @@ class Alien(pygame.sprite.Sprite):
         self.image = self.base_image
         self.pos = pygame.math.Vector2(x,y)
         self.rect = self.image.get_rect(topleft = self.pos)
+        self.mask = pygame.mask.from_surface(self.image)
     def update(self, direction):
         self.pos[0] += direction 
         self.rect.midtop = self.pos.x,self.pos.y

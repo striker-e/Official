@@ -41,11 +41,9 @@ class Game:
             if alien.rect.right >= rightconstraint:
                 self.alien_direction = -1
                 self.alien_move_down(0.5)
-                print(alien.rect.x,alien.rect.y)
             elif alien.rect.left <= leftconstraint:
                 self.alien_direction = 1
                 self.alien_move_down(0.5)
-                print(alien.rect.x,alien.rect.y)
     def alien_move_down(self, distance): #Moves aliens down.
         if self.aliens:
             for alien in self.aliens.sprites(): 
@@ -55,8 +53,16 @@ class Game:
             random_alien = random.choice(self.aliens.sprites())
             laser_sprite = AlienLaser(random_alien.rect.center, height)
             self.alien_lasers.add(laser_sprite)
-    def run(self): #Run Object, draws gamescreen, player,alien each update using each of the sprite update and draw functions.
-        self.gamescreen = GameScreen(displayscreen, self.width, self.height)
+    def collisiondetection(self):
+        for laser in self.player.sprite.lasers:
+            if not self.gamescreen.gamewindow.contains(laser.rect):
+                laser.kill()
+            for alien in self.aliens:
+                if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
+                    alien.kill()
+                    laser.kill()
+                    self.gamescreen.score += 20
+    def run(self): #Run Object, player,alien each update using each of the sprite update and draw functions.
         self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
         self.aliens.update(self.alien_direction)
         self.aliencheckpos(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
@@ -65,11 +71,12 @@ class Game:
         displayscreen.fill("black")
         self.player.draw(displayscreen)
         self.player.sprite.lasers.draw(displayscreen)
+        self.gamescreen.draw()
+        self.collisiondetection()
         displayscreen.set_at((self.player.sprite.checker),"red") #For Testing Purposes
-        print(self.player.sprite.dir)
         self.aliens.draw(displayscreen)
         self.alien_lasers.draw(displayscreen)
-        self.gamescreen.draw()
+
 if __name__ == "__main__":
     pygame.init() # Pygame Initialisation and base variable's definitions.
     width=1280
