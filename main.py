@@ -63,19 +63,17 @@ class Game:
                 for alien in self.aliens:
                     if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
                         alien.kill()
-                        #laser.kill()
+                        laser.kill()
                         self.gamescreen.score += 20
                     elif pygame.sprite.spritecollide(alien,self.player,False):
-                        print("Hit Player")
                         self.player.sprite.kill()
                         self.gameover()
                     elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
                         self.gameover()
-            elif not self.aliens:
-                self.gameover()
+        if not self.aliens:
+            self.gameover()
         for alienlaser in self.alien_lasers:
             if pygame.sprite.spritecollide(alienlaser,self.player,False):
-                print("Hit player 2nd case")
                 alienlaser.kill()
                 self.player.sprite.kill()
                 self.gameover()
@@ -153,7 +151,6 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_ESCAPE:
                     running = False
                 elif running and event.key == pygame.K_p: #Draw pause menu.
-                    print("About to draw the pause menu doggo")
                     pausestate = True
                     running = False
                     if pausestate:
