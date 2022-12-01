@@ -14,6 +14,7 @@ class Game:
         self.width = width
         self.height = height
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
+        self.gameover = GameOver(self.screen,self.width,self.height)
         self.pos = self.gamescreen.gamewindow.midbottom
         self.playersprite = Player(self.pos)
         self.player = pygame.sprite.GroupSingle(self.playersprite)
@@ -67,19 +68,18 @@ class Game:
                         self.gamescreen.score += 20
                     elif pygame.sprite.spritecollide(alien,self.player,False):
                         self.player.sprite.kill()
-                        self.gameover()
+                        self.gameend()
                     elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
-                        self.gameover()
+                        self.gameend()
         if not self.aliens:
-            self.gameover()
+            self.gameend()
         for alienlaser in self.alien_lasers:
             if pygame.sprite.spritecollide(alienlaser,self.player,False):
                 alienlaser.kill()
                 self.player.sprite.kill()
-                self.gameover()
-    def gameover(self):
-        gameover = GameOver(self.screen,self.width,self.height,self.gamescreen.score)
-        gameover.draw()
+                self.gameend()
+    def gameend(self):
+        self.gameover.draw(self.gamescreen.score)
         global gameoverstate 
         gameoverstate = True
         global running
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     gameoverstate = False
     clock = pygame.time.Clock()
     while True:
-        if running == False and pausestate == False: #Creates a new game if in main menu.
+        if not running and not pausestate and not gameoverstate: #Creates a new game if in main menu.
             game = Game(base_width,base_height,displayscreen)
         keys = pygame.key.get_pressed() #Gets key's pressed each iteration.
         for event in pygame.event.get(): #Check events one by one
@@ -137,9 +137,9 @@ if __name__ == "__main__":
                 game.width, game.height = width,height
                 # changed this as would make gamescreen be scaled twice.
             elif event.type == pygame.KEYDOWN: #Key Checks
-                if event.key == pygame.K_k:
+                if event.key == pygame.K_k and not gameoverstate:
                     mainmenu.change(True)
-                elif event.key == pygame.K_i:
+                elif event.key == pygame.K_i and not gameoverstate:
                     mainmenu.change(False)
                 elif event.key == pygame.K_RETURN and mainmenu.index == 0 and not pausestate and not gameoverstate:
                     running = True
@@ -157,6 +157,13 @@ if __name__ == "__main__":
                     running = False
                     if pausestate:
                         pausemenu.draw()
+                elif gameoverstate:
+                    if event.key == pygame.K_BACKSPACE:
+                        game.gameover.username = game.gameover.username[0:-1]
+                    elif len(game.gameover.username) <= 2:
+                        game.gameover.username += event.unicode
+                    game.gameover.draw(game.gamescreen.score)
+                    print(game.gameover.username)
             elif event.type == alaser:
                 game.alien_shoot()
         if running and not pausestate: #Run game each frame.
