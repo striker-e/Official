@@ -113,6 +113,8 @@ if __name__ == "__main__":
     displayscreen = screen.copy() #Make a fakescreen to draw all objects onto so can resize this whole screen when a resize occurs.
     pygame.display.set_caption("PROJ")
     pygame.font.init()
+    alaser = pygame.USEREVENT + 1
+    pygame.time.set_timer(alaser,400)
     mainmenu = Menu(width,height,screen) #Constructs objects for the main menu and the pause menu.
     pausemenu = PauseMenu(displayscreen,width,height)
     pausestate = False
@@ -155,6 +157,8 @@ if __name__ == "__main__":
                     running = False
                     if pausestate:
                         pausemenu.draw()
+            elif event.type == alaser:
+                game.alien_shoot()
         if running and not pausestate: #Run game each frame.
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
