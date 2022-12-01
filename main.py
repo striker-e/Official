@@ -61,7 +61,15 @@ class Game:
                 laser.kill()
             if self.aliens:
                 for alien in self.aliens:
-                    if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
+                    surface = laser.mask.to_surface()
+                    surface_rect = surface.get_rect(center = laser.pos)
+                    self.screen.blit(surface,surface_rect)
+                    al = alien.mask.to_surface()
+                    al_rect = al.get_rect(topleft = alien.pos)
+                    print(alien.pos)
+                    print(al_rect.topleft)
+                    self.screen.blit(al,al_rect)
+                    if alien.mask.overlap(laser.mask,((laser.pos[0] - alien.pos[0]),laser.pos[1] - alien.pos[1])):
                         alien.kill()
                         laser.kill()
                         self.gamescreen.score += 20
@@ -163,4 +171,4 @@ if __name__ == "__main__":
             screen.blit(background, (0,0))
             mainmenu.draw() #Draws the menu.
         pygame.display.update() #Updates all display changes
-        clock.tick(60) #Sets the FPS to 60
+        clock.tick(5) #Sets the FPS to 60
