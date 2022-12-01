@@ -65,7 +65,6 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         self.lasers.add(Laser(self.laserangle,3,self.spawnpoint))
         self.lasers.update()
-        print("Dog")
     def restrictmovement(self,leftconstraint,rightconstraint):
         if self.rect.right > rightconstraint:
             self.rect.right = rightconstraint

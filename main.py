@@ -5,10 +5,12 @@ from player import Player
 from alien import Alien
 from laser import Laser, AlienLaser
 from pausemenu import PauseMenu
+from gameover import GameOver
 import random
 class Game:
     #Game Class Constructor,Creates Gamescreen with the initial resolution and positions it correctly, creates only one player object. Creates aliens once.
-    def __init__(self,width,height):
+    def __init__(self,width,height,screen):
+        self.screen = screen
         self.width = width
         self.height = height
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
@@ -57,26 +59,50 @@ class Game:
         for laser in self.player.sprite.lasers:
             if not self.gamescreen.gamewindow.contains(laser.rect):
                 laser.kill()
-            for alien in self.aliens:
-                if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
-                    alien.kill()
-                    laser.kill()
-                    self.gamescreen.score += 20
+            if self.aliens:
+                for alien in self.aliens:
+                    if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
+                        alien.kill()
+                        #laser.kill()
+                        self.gamescreen.score += 20
+                    elif pygame.sprite.spritecollide(alien,self.player,False):
+                        print("Hit Player")
+                        self.player.sprite.kill()
+                        self.gameover()
+                    elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
+                        self.gameover()
+            elif not self.aliens:
+                self.gameover()
+        for alienlaser in self.alien_lasers:
+            if pygame.sprite.spritecollide(alienlaser,self.player,False):
+                print("Hit player 2nd case")
+                alienlaser.kill()
+                self.player.sprite.kill()
+                self.gameover()
+    def gameover(self):
+        gameover = GameOver(self.screen,self.width,self.height,self.gamescreen.score)
+        gameover.draw()
+        global gameoverstate 
+        gameoverstate = True
+        global running
+        running = False
     def run(self): #Run Object, player,alien each update using each of the sprite update and draw functions.
-        self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
-        self.aliens.update(self.alien_direction)
-        self.aliencheckpos(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
-        #self.alien_shoot()
-        self.alien_lasers.update()
-        displayscreen.fill("black")
-        self.player.draw(displayscreen)
-        self.player.sprite.lasers.draw(displayscreen)
-        self.gamescreen.draw()
-        self.collisiondetection()
-        displayscreen.set_at((self.player.sprite.checker),"red") #For Testing Purposes
-        self.aliens.draw(displayscreen)
-        self.alien_lasers.draw(displayscreen)
-
+        if running:
+            self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
+            self.aliens.update(self.alien_direction)
+            self.aliencheckpos(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
+            #self.alien_shoot()
+            self.alien_lasers.update()
+            displayscreen.fill("black")
+            self.player.draw(displayscreen)
+            self.player.sprite.lasers.draw(displayscreen)
+            self.gamescreen.draw()
+            displayscreen.set_at((self.player.sprite.checker),"red") #For Testing Purposes
+            self.aliens.draw(displayscreen)
+            self.alien_lasers.draw(displayscreen)
+            self.collisiondetection()
+        else:
+            return False
 if __name__ == "__main__":
     pygame.init() # Pygame Initialisation and base variable's definitions.
     width=1280
@@ -93,10 +119,11 @@ if __name__ == "__main__":
     pausemenu = PauseMenu(displayscreen,width,height)
     pausestate = False
     running = False
+    gameoverstate = False
     clock = pygame.time.Clock()
     while True:
         if running == False and pausestate == False: #Creates a new game if in main menu.
-            game = Game(base_width,base_height)
+            game = Game(base_width,base_height,displayscreen)
         keys = pygame.key.get_pressed() #Gets key's pressed each iteration.
         for event in pygame.event.get(): #Check events one by one
             if event.type == pygame.QUIT:
@@ -107,31 +134,34 @@ if __name__ == "__main__":
                 new_height = max(600,event.size[1])
                 screen = pygame.display.set_mode((new_width,new_height),pygame.RESIZABLE)
                 width,height = screen.get_width(),screen.get_height()
-                #game.width, game.height = width,height, changed this as would make gamescreen be scaled twice.
+                game.width, game.height = width,height
+                # changed this as would make gamescreen be scaled twice.
             elif event.type == pygame.KEYDOWN: #Key Checks
                 if event.key == pygame.K_k:
                     mainmenu.change(True)
                 elif event.key == pygame.K_i:
                     mainmenu.change(False)
-                elif event.key == pygame.K_RETURN and mainmenu.index == 0 and pausestate == False:
+                elif event.key == pygame.K_RETURN and mainmenu.index == 0 and not pausestate and not gameoverstate:
                     running = True
-                elif event.key == pygame.K_RETURN and pausestate == True: #Pause Menu key checks
+                elif event.key == pygame.K_RETURN and (pausestate or gameoverstate): #Pause Menu key checks
                     running = False
                     pausestate = False
-                elif event.key == pygame.K_p and pausestate == True:
+                    gameoverstate = False
+                elif event.key == pygame.K_p and pausestate:
                     running = True
                     pausestate = False
                 elif event.key == pygame.K_ESCAPE:
                     running = False
                 elif running and event.key == pygame.K_p: #Draw pause menu.
+                    print("About to draw the pause menu doggo")
                     pausestate = True
                     running = False
                     if pausestate:
                         pausemenu.draw()
-        if running and pausestate == False: #Run game each frame.
+        if running and not pausestate: #Run game each frame.
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
-        if running == False and pausestate == False:
+        if not running and not pausestate and not gameoverstate:
             background = pygame.transform.scale(background, (width, height)) #Scales the background correctly.
             screen.blit(background, (0,0))
             mainmenu.draw() #Draws the menu.
