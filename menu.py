@@ -1,4 +1,5 @@
 import pygame
+from text import Text
 class Menu:
     menuoptions = ["Solo Mode", "Coop", "Online","Options"]
     adjust = 30
@@ -14,6 +15,15 @@ class Menu:
         self.four = 0
         self.font = pygame.font.Font('assets/font.TTF', 32)
     def draw(self):
+        # xval = 100
+        # solomode = Text(self.menuoptions[0],(xval,50),self.screen,self.colourstates[self.one])
+        # solomode.draw()
+        # coopmode = Text(self.menuoptions[1],(xval,100),self.screen,self.colourstates[self.two])
+        # coopmode.draw()
+        # onlinemode = Text(self.menuoptions[2],(xval,150),self.screen,self.colourstates[self.three])
+        # onlinemode.draw()
+        # options = Text(self.menuoptions[3],(xval,200),self.screen,self.colourstates[self.four])
+        # options.draw()
         self.solomode = self.font.render(self.menuoptions[0],True,self.colourstates[self.one])
         self.solomoderect = self.solomode.get_rect()
         self.solomoderect.midleft = (50, 50)
@@ -46,12 +56,16 @@ class Menu:
         if value:
             if self.index != 3:
                 self.index += 1
+                if self.index > 3:
+                    self.index == 3
                 assign()
             else:
                 self.one,self.two,self.three,self.four = 0,0,0,1
         elif not value:
             if self.index != 0:
                 self.index -= 1
+                if self.index < 1:
+                    self.index == 0
                 assign()
             else:
                 self.one,self.two,self.three,self.four = 1,0,0,0

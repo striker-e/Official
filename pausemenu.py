@@ -8,6 +8,6 @@ class PauseMenu():
         self.height = height
     def draw(self): #Draw function, fills screen black when paused and draws text over.
         self.screen.fill("black ")
-        text = Text("To return to menu press return or To resume game press p",(self.width/2,self.height/2),self.screen,"white")
+        text = Text("To return to menu press tab or To resume game press p",(self.width/2,self.height/2),self.screen,"white",1)
         text.draw()
  

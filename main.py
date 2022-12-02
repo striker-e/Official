@@ -6,6 +6,7 @@ from alien import Alien
 from laser import Laser, AlienLaser
 from pausemenu import PauseMenu
 from gameover import GameOver
+from optionsmenu import OptionsMenu
 import random
 class Game:
     #Game Class Constructor,Creates Gamescreen with the initial resolution and positions it correctly, creates only one player object. Creates aliens once.
@@ -117,13 +118,16 @@ if __name__ == "__main__":
     pygame.time.set_timer(alaser,400)
     mainmenu = Menu(width,height,screen) #Constructs objects for the main menu and the pause menu.
     pausemenu = PauseMenu(displayscreen,width,height)
+    optionsmenu = OptionsMenu(displayscreen,width,height)
     pausestate = False
     running = False
     gameoverstate = False
+    optionsstate = False
     clock = pygame.time.Clock()
     while True:
-        if not running and not pausestate and not gameoverstate: #Creates a new game if in main menu.
+        if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
             game = Game(base_width,base_height,displayscreen)
+            #gameoverstate = True #Change This back for testing only
         keys = pygame.key.get_pressed() #Gets key's pressed each iteration.
         for event in pygame.event.get(): #Check events one by one
             if event.type == pygame.QUIT:
@@ -141,12 +145,16 @@ if __name__ == "__main__":
                     mainmenu.change(True)
                 elif event.key == pygame.K_i and not gameoverstate:
                     mainmenu.change(False)
-                elif event.key == pygame.K_RETURN and mainmenu.index == 0 and not pausestate and not gameoverstate:
-                    running = True
-                elif event.key == pygame.K_RETURN and (pausestate or gameoverstate): #Pause Menu key checks
+                elif event.key == pygame.K_RETURN and not pausestate and not gameoverstate and not optionsstate:
+                    if mainmenu.index == 0:
+                        running = True
+                    if mainmenu.index == 3:
+                        optionsstate = True
+                elif event.key == pygame.K_TAB and (pausestate or gameoverstate or optionsstate): #Pause Menu key checks
                     running = False
                     pausestate = False
                     gameoverstate = False
+                    optionsstate = False
                 elif event.key == pygame.K_p and pausestate:
                     running = True
                     pausestate = False
@@ -160,16 +168,24 @@ if __name__ == "__main__":
                 elif gameoverstate:
                     if event.key == pygame.K_BACKSPACE:
                         game.gameover.username = game.gameover.username[0:-1]
+                    elif event.key == pygame.K_RETURN:
+                        if len(game.gameover.username):
+                            game.gameover.savefunction(game.gamescreen.score)
+                            gameoverstate = False
                     elif len(game.gameover.username) <= 2:
                         game.gameover.username += event.unicode
-                    game.gameover.draw(game.gamescreen.score)
-                    print(game.gameover.username)
+                elif optionsstate:
+                    pass
             elif event.type == alaser:
                 game.alien_shoot()
-        if running and not pausestate: #Run game each frame.
+        if gameoverstate:
+            game.gameover.draw(game.gamescreen.score)
+        elif optionsstate:
+            optionsmenu.draw()
+        elif running and not pausestate: #Run game each frame.
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
-        if not running and not pausestate and not gameoverstate:
+        if not running and not pausestate and not gameoverstate and not optionsstate:
             background = pygame.transform.scale(background, (width, height)) #Scales the background correctly.
             screen.blit(background, (0,0))
             mainmenu.draw() #Draws the menu.
