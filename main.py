@@ -7,6 +7,7 @@ from laser import Laser, AlienLaser
 from pausemenu import PauseMenu
 from gameover import GameOver
 from optionsmenu import OptionsMenu
+from text import Text
 import random
 class Game:
     #Game Class Constructor,Creates Gamescreen with the initial resolution and positions it correctly, creates only one player object. Creates aliens once.
@@ -123,6 +124,7 @@ if __name__ == "__main__":
     running = False
     gameoverstate = False
     optionsstate = False
+    firsttime = True
     clock = pygame.time.Clock()
     while True:
         if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
@@ -141,9 +143,9 @@ if __name__ == "__main__":
                 game.width, game.height = width,height
                 # changed this as would make gamescreen be scaled twice.
             elif event.type == pygame.KEYDOWN: #Key Checks
-                if event.key == pygame.K_k and not gameoverstate:
+                if event.key == pygame.K_k and not gameoverstate and not running:
                     mainmenu.change(True)
-                elif event.key == pygame.K_i and not gameoverstate:
+                elif event.key == pygame.K_i and not gameoverstate and not running:
                     mainmenu.change(False)
                 elif event.key == pygame.K_RETURN and not pausestate and not gameoverstate and not optionsstate:
                     if mainmenu.index == 0:
@@ -155,6 +157,7 @@ if __name__ == "__main__":
                     pausestate = False
                     gameoverstate = False
                     optionsstate = False
+                    firsttime = True
                 elif event.key == pygame.K_p and pausestate:
                     running = True
                     pausestate = False
@@ -181,7 +184,16 @@ if __name__ == "__main__":
         if gameoverstate:
             game.gameover.draw(game.gamescreen.score)
         elif optionsstate:
-            optionsmenu.draw()
+            if firsttime:
+                optionsmenu.draw()
+                list = game.gameover.topfive() #[score:username\n,score:username\n]
+                yvalues = [height * 0.30,height * 0.40,height*0.50,height*0.60,height*0.70]
+                highscore = Text("Highscores Below",(width * 0.80,height * 0.20),displayscreen,"red",1,24)
+                highscore.draw()
+                for i in range(len(list)):
+                    text = Text(list[i].split(":")[0] + " " + (list[i].split(":")[1]).split("\n")[0],(width * 0.80,yvalues[i]),displayscreen,"blue",1,32)
+                    text.draw()
+                firsttime = not firsttime
         elif running and not pausestate: #Run game each frame.
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.

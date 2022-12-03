@@ -6,14 +6,13 @@ class GameOver(PauseMenu):
     def __init__(self,screen,width,height):
         super().__init__(screen,width,height)
         self.username = '123'
-        self.topfive = []
     def draw(self,score):
         self.screen.fill("black")
         scoreprint = Text(f"Game Over You Got a Score of {score}",(self.width/2,self.height/2),self.screen,"white",1)
         scoreprint.draw()
         returnmenu = Text("To Return To Menu Press Tab",(self.width/2,self.height * 0.75),self.screen,"red",1)
         returnmenu.draw()
-        enterusername = Text("Enter Your Username TO Save Below Press Return To Save and Go To Mennu",(self.width * 0.50,self.height * 0.10),self.screen,"blue",1)
+        enterusername = Text("Enter Your Username TO Save Below Press Return To Save and Go To Menu",(self.width * 0.50,self.height * 0.10),self.screen,"white",1)
         enterusername.draw()
         usernamerect = pygame.Rect(self.width * 0.50 - 50,self.height* 0.10, 100,20)
         usernamerect.center = self.width/2,self.height * 0.20
@@ -23,15 +22,22 @@ class GameOver(PauseMenu):
     def savefunction(self,score):
         self.filename = "highscore.txt"
         w = open(self.filename,"a+")
-        lines = open(self.filename,'r').readlines()
-        print(lines)
-        text = f'{self.username} : {score}'
-        for line in lines:
-            if self.username in line:
-                print("Found Identical")
-                lineindex = lines[line]
-                lines[lineindex] = text
-                w.writelines(lines)
-        w.write(text)
+        writescore = str(score)
+        w.write(writescore+ ":" +self.username + "\n")
         w.close()
-
+    def topfive(self):
+        r = open("highscore.txt","r")
+        lines = r.readlines()
+        sortedlines = sorted(lines,key=lambda x:int(x.split(":")[0]),reverse=True)
+        sortedlines = sortedlines[:5]
+        return sortedlines
+        """ 
+            This code makes use of lambda functions which is the same as 
+            def simplefunction(val):
+                score,value = val.split(":")
+                return int(score)
+            sortedlines = sorted(lines, key=simplefunction, reverse=True)
+            key takes previous argument and applies function on each element 
+            like map(), and key just lets sorted() know how to sort the iterable.
+            In this case it sorts it based on the first element after splitting each element.
+        """

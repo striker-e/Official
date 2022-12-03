@@ -1,5 +1,9 @@
-sav : 0
-sav : 100
-sav : 0
-sav : 0
-123 : 0
+40:abc
+80:abd
+160:abe
+100:dog
+220:sav
+0:bru
+0:abf
+300:sad
+0:123

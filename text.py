@@ -1,11 +1,14 @@
 import pygame
 class Text():
-    def __init__(self,text,rectpos,screen,colour,rect = "center"):
+    def __init__(self,text,rectpos,screen,colour,rect = "center",size = None):
         self.string = text
         self.pos = rectpos
         self.screen = screen
         self.colour = colour
-        self.font = pygame.font.Font('assets/font.TTF',16)
+        self.size = 16
+        if size:
+            self.size = size
+        self.font = pygame.font.Font('assets/font.TTF',self.size)
         self.text = self.font.render(self.string,True,self.colour)
         if rect:
             self.textrect = self.text.get_rect(center = self.pos)
