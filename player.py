@@ -3,10 +3,16 @@ from gamescreen import GameScreen
 from laser import Laser
 import math
 class Player(pygame.sprite.Sprite):
-    def __init__(self,pos):
+    def __init__(self,pos,colour,keys = None):
         super().__init__()
-        self.base_image = pygame.image.load('./assets/blue_ship.png')
-        self.base_image = pygame.transform.scale(self.base_image, (30,30))
+        self.keys = keys
+        if colour == "red":
+            self.base_image = pygame.image.load('./assets/redship.png')
+            self.base_image = pygame.transform.scale(self.base_image,(20,20))
+            pos = pos[0],pos[1] - 5
+        else:
+            self.base_image = pygame.image.load('./assets/blue_ship.png')
+            self.base_image = pygame.transform.scale(self.base_image, (30,30))
         self.image = self.base_image
         self.width = 1280
         self.height = 720
@@ -21,15 +27,15 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.base_image.get_rect(midbottom = self.position)
     def get_input(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
+        if keys[self.keys[0]]:
             self.position.x += self.speed
-        elif keys[pygame.K_DOWN]:
+        elif keys[self.keys[1]]:
             self.position.x -= self.speed
-        elif keys[pygame.K_RIGHT]:
+        elif keys[self.keys[2]]:
             self.turnright()
-        elif keys[pygame.K_LEFT]:
+        elif keys[self.keys[3]]:
             self.turnleft()
-        elif keys[pygame.K_SPACE] and self.ready:
+        elif keys[self.keys[4]] and self.ready:
             self.shoot()
             self.ready = False
             self.lasertime = pygame.time.get_ticks()

@@ -6,8 +6,14 @@ class GameOver(PauseMenu):
     def __init__(self,screen,width,height):
         super().__init__(screen,width,height)
         self.username = '123'
-    def draw(self,score):
+    def draw(self,score,val):
         self.screen.fill("black")
+        if val:
+            whogothit = Text("Player 2 or RED Got Hit",(self.width/2,self.height * 0.30),self.screen,"white",1)
+            whogothit.draw()
+        else:
+            whogothit = Text("Player 1 or BLUE Got Hit",(self.width/2,self.height * 0.30),self.screen,"white",1)
+            whogothit.draw()
         scoreprint = Text(f"Game Over You Got a Score of {score}",(self.width/2,self.height/2),self.screen,"white",1)
         scoreprint.draw()
         returnmenu = Text("To Return To Menu Press Tab",(self.width/2,self.height * 0.75),self.screen,"red",1)
