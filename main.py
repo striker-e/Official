@@ -16,19 +16,18 @@ class Game:
         self.screen = screen
         self.width = width
         self.height = height
-        normalkeys = [pygame.K_UP,pygame.K_DOWN,pygame.K_RIGHT,pygame.K_LEFT,pygame.K_SPACE]
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
         self.gameover = GameOver(self.screen,self.width,self.height)
         self.pos = self.gamescreen.gamewindow.midbottom
+        self.normalkeys = [pygame.K_w,pygame.K_s,pygame.K_d,pygame.K_a,pygame.K_SPACE]
         if self.option:
-            keys = [pygame.K_w,pygame.K_s,pygame.K_d,pygame.K_a,pygame.K_SPACE]
-            self.playersprite2 = Player((self.pos[0] + 100,self.pos[1]),"red",keys)
+            self.playersprite2 = Player((self.pos[0] + 100,self.pos[1]),"red",self.normalkeys)
             self.player2 = pygame.sprite.GroupSingle(self.playersprite2)
             keyset2 = [pygame.K_UP,pygame.K_DOWN,pygame.K_RIGHT,pygame.K_LEFT,pygame.K_KP_ENTER]
             self.playersprite = Player(self.pos,"blue",keyset2)
             self.player = pygame.sprite.GroupSingle(self.playersprite)
         elif not self.option:
-            self.playersprite = Player(self.pos,"blue",normalkeys)
+            self.playersprite = Player(self.pos,"blue",self.normalkeys)
             self.player = pygame.sprite.GroupSingle(self.playersprite)
         self.aliens = pygame.sprite.Group()
         self.aliencreation(rows = 7, cols = 10)
@@ -80,9 +79,8 @@ class Game:
                         self.gamescreen.score += 20
                     elif pygame.sprite.spritecollide(alien,self.player,False):
                         self.player.sprite.kill()
-                        global val
-                        val = False
-                        self.gameend(val)
+                        self.gameover.val = False
+                        self.gameend()
                     # elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
                     #     self.gameend(False)
         if self.option:
@@ -97,25 +95,26 @@ class Game:
                             self.gamescreen.score += 20
                         elif pygame.sprite.spritecollide(alien,self.player,False):
                             self.player2.sprite.kill()
-                            val = True
-                            self.gameend(val)
+                            self.gameover.val = False
+                            self.gameend()
                         # elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
-                        #     self.gameend(False)
+                        # self.gameend(False)
         if not self.aliens:
+            self.gameover.val = 2
             self.gameend()
         for alienlaser in self.alien_lasers:
             if pygame.sprite.spritecollide(alienlaser,self.player,False):
                 alienlaser.kill()
                 self.player.sprite.kill()
-                val = False
-                self.gameend(val)
+                self.gameover.val = False
+                self.gameend()
             elif self.option and pygame.sprite.spritecollide(alienlaser,self.player2,False):
                 alienlaser.kill()
                 self.player2.sprite.kill()
-                val = True
-                self.gameend(True)
-    def gameend(self,val):
-        self.gameover.draw(self.gamescreen.score,val)
+                self.gameover.val = True
+                self.gameend()
+    def gameend(self):
+        self.gameover.draw(self.gamescreen.score)
         global gameoverstate 
         gameoverstate = True
         global running
@@ -168,11 +167,10 @@ if __name__ == "__main__":
     firsttime = True
     coopmode = False
     gamemade = False
-    val = False
     clock = pygame.time.Clock()
     while True:
         if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
-                game = Game(base_width,base_height,displayscreen)
+                game = Game(base_width,base_height,displayscreen) #Change back to (basew,baseh,screen)
             #gameoverstate = True #Change This back for testing only
         keys = pygame.key.get_pressed() #Gets key's pressed each iteration.
         for event in pygame.event.get(): #Check events one by one
@@ -227,12 +225,10 @@ if __name__ == "__main__":
                             gameoverstate = False
                     elif len(game.gameover.username) <= 2:
                         game.gameover.username += event.unicode
-                elif optionsstate:
-                    pass
             elif event.type == alaser and running:
                 game.alien_shoot()
         if gameoverstate:
-            game.gameover.draw(game.gamescreen.score,val)
+            game.gameover.draw(game.gamescreen.score)
         elif optionsstate:
             if firsttime:
                 optionsmenu.draw()
@@ -246,6 +242,9 @@ if __name__ == "__main__":
                 firsttime = not firsttime
         elif running and not pausestate: #Run game each frame.
             game.run()
+        elif running:
+            #Run server communication exchanges before game.onlinerun()
+            game.onlinerun() #Pass something in to online run, such as player position and update it before drawing.
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
         if not running and not pausestate and not gameoverstate and not optionsstate:
             background = pygame.transform.scale(background, (width, height)) #Scales the background correctly.
