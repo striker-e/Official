@@ -76,13 +76,12 @@ class Game:
                 for alien in self.aliens:
                     if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
                         alien.kill()
-                        laser.kill()
+                        #laser.kill()
                         self.gamescreen.score += 20
                     elif pygame.sprite.spritecollide(alien,self.player,False):
                         self.player.sprite.kill()
-                        global val
-                        val = False
-                        self.gameend(val)
+                        self.gameover.val = False
+                        self.gameend()
                     # elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
                     #     self.gameend(False)
         if self.option:
@@ -97,25 +96,26 @@ class Game:
                             self.gamescreen.score += 20
                         elif pygame.sprite.spritecollide(alien,self.player,False):
                             self.player2.sprite.kill()
-                            val = True
-                            self.gameend(val)
+                            self.gameover.val = False
+                            self.gameend()
                         # elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
-                        #     self.gameend(False)
+                        # self.gameend(False)
         if not self.aliens:
+            self.gameover.val = 2
             self.gameend()
         for alienlaser in self.alien_lasers:
             if pygame.sprite.spritecollide(alienlaser,self.player,False):
                 alienlaser.kill()
                 self.player.sprite.kill()
-                val = False
-                self.gameend(val)
+                self.gameover.val = False
+                self.gameend()
             elif self.option and pygame.sprite.spritecollide(alienlaser,self.player2,False):
                 alienlaser.kill()
                 self.player2.sprite.kill()
-                val = True
-                self.gameend(True)
-    def gameend(self,val):
-        self.gameover.draw(self.gamescreen.score,val)
+                self.gameover.val = True
+                self.gameend()
+    def gameend(self):
+        self.gameover.draw(self.gamescreen.score)
         global gameoverstate 
         gameoverstate = True
         global running
@@ -168,7 +168,6 @@ if __name__ == "__main__":
     firsttime = True
     coopmode = False
     gamemade = False
-    val = False
     clock = pygame.time.Clock()
     while True:
         if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
@@ -227,12 +226,10 @@ if __name__ == "__main__":
                             gameoverstate = False
                     elif len(game.gameover.username) <= 2:
                         game.gameover.username += event.unicode
-                elif optionsstate:
-                    pass
             elif event.type == alaser and running:
                 game.alien_shoot()
         if gameoverstate:
-            game.gameover.draw(game.gamescreen.score,val)
+            game.gameover.draw(game.gamescreen.score)
         elif optionsstate:
             if firsttime:
                 optionsmenu.draw()
