@@ -19,14 +19,14 @@ class Game:
         self.gamescreen = GameScreen(displayscreen, self.width, self.height)
         self.gameover = GameOver(self.screen,self.width,self.height)
         self.pos = self.gamescreen.gamewindow.midbottom
-        self.normalkeys = [pygame.K_w,pygame.K_s,pygame.K_d,pygame.K_a,pygame.K_SPACE]
+        self.normalkeys = [pygame.K_RIGHT,pygame.K_LEFT,pygame.K_UP,pygame.K_DOWN,pygame.K_SPACE]
         if self.option:
             self.gamescreen = GameScreen(displayscreen,self.width,self.height,1)
             self.pos = self.gamescreen.gamewindow.midbottom
-            keys = [pygame.K_w,pygame.K_s,pygame.K_d,pygame.K_a,pygame.K_SPACE]
+            keys = [pygame.K_d,pygame.K_a,pygame.K_w,pygame.K_s,pygame.K_SPACE]
             self.playersprite2 = Player((self.pos[0] + 100,self.pos[1]),"red",keys)
             self.player2 = pygame.sprite.GroupSingle(self.playersprite2)
-            keyset2 = [pygame.K_UP,pygame.K_DOWN,pygame.K_RIGHT,pygame.K_LEFT,pygame.K_KP_ENTER]
+            keyset2 = [pygame.K_RIGHT,pygame.K_LEFT,pygame.K_UP,pygame.K_DOWN,pygame.K_KP_ENTER]
             self.playersprite = Player(self.pos,"blue",keyset2)
             self.player = pygame.sprite.GroupSingle(self.playersprite)
         elif not self.option:
@@ -234,6 +234,9 @@ if __name__ == "__main__":
                         game.gameover.username += event.unicode
                 elif optionsstate:
                     if event.key == pygame.K_DOWN:
+                        optionsmenu.onestate = not optionsmenu.onestate
+                    elif event.key == pygame.K_RETURN and optionsmenu.onestate:
+                        game.gameover.deletehighscores()
                         optionsmenu.onestate = not optionsmenu.onestate
             elif event.type == alaser and running:
                 game.alien_shoot()

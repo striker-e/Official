@@ -51,3 +51,5 @@ class GameOver(PauseMenu):
             like map(), and key just lets sorted() know how to sort the iterable.
             In this case it sorts it based on the first element after splitting each element.
         """
+    def deletehighscores(self):
+        open("highscore.txt","w").close()
