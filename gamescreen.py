@@ -1,6 +1,6 @@
 import pygame
 class GameScreen:
-    def __init__(self,screen,width,height):
+    def __init__(self,screen,width,height,option=0):
         self.screen = screen
         self.width = width
         self.height = height
@@ -10,6 +10,11 @@ class GameScreen:
         self.top = self.height * 0.30
         self.gamewindowwidth = self.width * 0.35
         self.gamewindowheight = self.height * 0.60
+        if option:
+            self.top = self.height * 0.10
+            self.gamewindowwidth = self.width * 0.85
+            self.gamewindowheight = self.height * 0.75
+            self.left = self.width * 0.08
         self.gamewindow = pygame.Rect(self.left,self.top,self.gamewindowwidth,self.gamewindowheight)
         self.rect = self.gamewindow
         self.mask = pygame.mask.Mask(self.gamewindow.size, True)
