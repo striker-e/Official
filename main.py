@@ -21,6 +21,8 @@ class Game:
         self.gameover = GameOver(self.screen,self.width,self.height)
         self.pos = self.gamescreen.gamewindow.midbottom
         if self.option:
+            self.gamescreen = GameScreen(displayscreen,self.width,self.height,1)
+            self.pos = self.gamescreen.gamewindow.midbottom
             keys = [pygame.K_w,pygame.K_s,pygame.K_d,pygame.K_a,pygame.K_SPACE]
             self.playersprite2 = Player((self.pos[0] + 100,self.pos[1]),"red",keys)
             self.player2 = pygame.sprite.GroupSingle(self.playersprite2)
@@ -31,7 +33,10 @@ class Game:
             self.playersprite = Player(self.pos,"blue",normalkeys)
             self.player = pygame.sprite.GroupSingle(self.playersprite)
         self.aliens = pygame.sprite.Group()
-        self.aliencreation(rows = 7, cols = 10)
+        if self.option:
+            self.aliencreation(rows = 9,cols=30)
+        elif not self.option:
+            self.aliencreation(rows = 7, cols = 10)
         self.alien_direction = 1
         self.alien_lasers = pygame.sprite.Group()
         self.all_aliens = self.aliens.sprites()
@@ -76,7 +81,7 @@ class Game:
                 for alien in self.aliens:
                     if alien.mask.overlap(laser.mask,laser.pos - alien.pos):
                         alien.kill()
-                        #laser.kill()
+                        laser.kill()
                         self.gamescreen.score += 20
                     elif pygame.sprite.spritecollide(alien,self.player,False):
                         self.player.sprite.kill()
@@ -122,6 +127,7 @@ class Game:
         running = False
         global coopmode
         coopmode = False
+        global value
     def run(self): #Run Object, player,alien each update using each of the sprite update and draw functions.
         if running:
             self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
@@ -157,7 +163,7 @@ if __name__ == "__main__":
     pygame.display.set_caption("PROJ")
     pygame.font.init()
     alaser = pygame.USEREVENT + 1
-    pygame.time.set_timer(alaser,400)
+    ticks = 400
     mainmenu = Menu(width,height,screen) #Constructs objects for the main menu and the pause menu.
     pausemenu = PauseMenu(displayscreen,width,height)
     optionsmenu = OptionsMenu(displayscreen,width,height)
@@ -167,12 +173,10 @@ if __name__ == "__main__":
     optionsstate = False
     firsttime = True
     coopmode = False
-    gamemade = False
     clock = pygame.time.Clock()
     while True:
         if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
-                game = Game(base_width,base_height,displayscreen)
-            #gameoverstate = True #Change This back for testing only
+            game = Game(base_width,base_height,displayscreen)
         keys = pygame.key.get_pressed() #Gets key's pressed each iteration.
         for event in pygame.event.get(): #Check events one by one
             if event.type == pygame.QUIT:
@@ -186,20 +190,22 @@ if __name__ == "__main__":
                 game.width, game.height = width,height
                 # changed this as would make gamescreen be scaled twice.
             elif event.type == pygame.KEYDOWN: #Key Checks
-                if event.key == pygame.K_k and not gameoverstate and not running:
+                if event.key == pygame.K_DOWN and not gameoverstate and not running and not optionsstate:
                     mainmenu.change(True)
-                elif event.key == pygame.K_i and not gameoverstate and not running:
+                elif event.key == pygame.K_UP and not gameoverstate and not running and not optionsstate:
                     mainmenu.change(False)
                 elif event.key == pygame.K_RETURN and not pausestate and not gameoverstate and not optionsstate:
                     match mainmenu.index:
                         case 0:
                             running = True
+                            pygame.time.set_timer(alaser,400)
                         case 3:
                             optionsstate = True
                         case 1:
                             coopmode = True
                             running = True
                             game = Game(base_width,base_height,displayscreen,True)
+                            pygame.time.set_timer(alaser,250)
                 elif event.key == pygame.K_TAB and (pausestate or gameoverstate or optionsstate): #Pause Menu key checks
                     running = False
                     pausestate = False
@@ -210,8 +216,8 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_p and pausestate:
                     running = True
                     pausestate = False
-                # elif event.key == pygame.K_ESCAPE:
-                #     running = False
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
                 elif running and event.key == pygame.K_p: #Draw pause menu.
                     pausestate = True
                     running = False
@@ -226,21 +232,23 @@ if __name__ == "__main__":
                             gameoverstate = False
                     elif len(game.gameover.username) <= 2:
                         game.gameover.username += event.unicode
+                elif optionsstate:
+                    if event.key == pygame.K_DOWN:
+                        print("state should change dog")
+                        optionsmenu.onestate = not optionsmenu.onestate
             elif event.type == alaser and running:
                 game.alien_shoot()
         if gameoverstate:
             game.gameover.draw(game.gamescreen.score)
         elif optionsstate:
-            if firsttime:
-                optionsmenu.draw()
-                list = game.gameover.topfive() #[score:username\n,score:username\n]
-                yvalues = [height * 0.30,height * 0.40,height*0.50,height*0.60,height*0.70]
-                highscore = Text("Highscores Below",(width * 0.80,height * 0.20),displayscreen,"red",1,24)
-                highscore.draw()
-                for i in range(len(list)):
-                    text = Text(list[i].split(":")[0] + " " + (list[i].split(":")[1]).split("\n")[0],(width * 0.80,yvalues[i]),displayscreen,"blue",1,32)
-                    text.draw()
-                firsttime = not firsttime
+            optionsmenu.draw()
+            list = game.gameover.topfive() #[score:username\n,score:username\n]
+            yvalues = [height * 0.30,height * 0.40,height*0.50,height*0.60,height*0.70]
+            highscore = Text("Highscores Below",(width * 0.80,height * 0.20),displayscreen,"red",1,24)
+            highscore.draw()
+            for i in range(len(list)):
+                text = Text(list[i].split(":")[0] + " " + (list[i].split(":")[1]).split("\n")[0],(width * 0.80,yvalues[i]),displayscreen,"blue",1,32)
+                text.draw()
         elif running and not pausestate: #Run game each frame.
             game.run()
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
