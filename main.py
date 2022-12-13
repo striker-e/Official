@@ -35,7 +35,11 @@ class Game:
         self.aliens = pygame.sprite.Group()
         if self.option:
             self.aliencreation(rows = 9,cols=30)
+            self.time = 250
+            self.timer = pygame.time.set_timer(alaser,self.time)
         elif not self.option:
+            self.time = 400
+            self.timer = pygame.time.set_timer(alaser,self.time)
             self.aliencreation(rows = 7, cols = 10)
         self.alien_direction = 1
         self.alien_lasers = pygame.sprite.Group()
@@ -106,9 +110,24 @@ class Game:
                         # elif alien.pos.y >= self.gamescreen.gamewindow.bottom:
                         # self.gameend(False)
         if not self.aliens:
-            self.gameover.val = 2
-            self.gameend()
+            if self.option:
+                self.time -= 20
+                self.timer = None
+                self.timer=pygame.time.set_timer(alaser,self.time)
+                self.aliencreation(rows = 9,cols = 30)
+            elif not self.option:
+                self.time -= 10
+                self.timer = None
+                self.timer = pygame.time.set_timer(alaser,self.time)
+                self.aliencreation(rows = 7,cols = 10)
+            self.alien_direction = 1
+            self.alien_lasers = pygame.sprite.Group()
+            self.all_aliens = self.aliens.sprites()
+            # self.gameover.val = 2
+            # self.gameend()
         for alienlaser in self.alien_lasers:
+            if not self.gamescreen.gamewindow.contains(alienlaser.rect):
+                alienlaser.kill()
             if pygame.sprite.spritecollide(alienlaser,self.player,False):
                 alienlaser.kill()
                 self.player.sprite.kill()
@@ -198,14 +217,14 @@ if __name__ == "__main__":
                     match mainmenu.index:
                         case 0:
                             running = True
-                            pygame.time.set_timer(alaser,400)
+                            #timer = pygame.time.set_timer(alaser,400)
                         case 3:
                             optionsstate = True
                         case 1:
                             coopmode = True
                             running = True
                             game = Game(base_width,base_height,displayscreen,True)
-                            pygame.time.set_timer(alaser,250)
+                            #timer = pygame.time.set_timer(alaser,250)
                 elif event.key == pygame.K_TAB and (pausestate or gameoverstate or optionsstate): #Pause Menu key checks
                     running = False
                     pausestate = False
@@ -239,7 +258,7 @@ if __name__ == "__main__":
                         game.gameover.deletehighscores()
                         optionsmenu.onestate = not optionsmenu.onestate
             elif event.type == alaser and running:
-                game.alien_shoot()
+                game.alien_shoot()  
         if gameoverstate:
             game.gameover.draw(game.gamescreen.score)
         elif optionsstate:
