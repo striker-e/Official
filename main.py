@@ -9,9 +9,10 @@ from gameover import GameOver
 from optionsmenu import OptionsMenu
 from text import Text
 import random
+import socket
 class Game:
     #Game Class Constructor,Creates Gamescreen with the initial resolution and positions it correctly, creates only one player object. Creates aliens once.
-    def __init__(self,width,height,screen,option = False):
+    def __init__(self,width,height,screen,option = False,onlinemode = False):
         self.option = option
         self.screen = screen
         self.width = width
@@ -37,10 +38,26 @@ class Game:
             self.aliencreation(rows = 9,cols=30)
             self.time = 250
             self.timer = pygame.time.set_timer(alaser,self.time)
-        elif not self.option:
+        elif not self.option and not onlinemode:
             self.time = 400
             self.timer = pygame.time.set_timer(alaser,self.time)
             self.aliencreation(rows = 7, cols = 10)
+        
+        elif onlinemode:
+            self.connected =  False
+
+            self.playersprite = Player(self.pos,"blue",self.normalkeys)
+            self.player = pygame.sprite.GroupSingle(self.playersprite)
+
+            self.player2sprite = Player(self.pos,"red")
+            self.player2 = pygame.sprite.GroupSingle(self.player2sprite)
+
+            self.initial = True
+            self.round = 0
+
+            self.signal = ""
+            
+            self.client_socket = []
         self.alien_direction = 1
         self.alien_lasers = pygame.sprite.Group()
         self.all_aliens = self.aliens.sprites()
@@ -169,6 +186,54 @@ class Game:
             self.collisiondetection()
         else:
             return False
+    
+    #Online Gamemode Function        
+    def onlinerun(self):
+
+        if not self.round: 
+            displayscreen.fill("black")
+            text  = Text("Waiting for players...",(width/2,height/2),displayscreen,"white",1)
+            text.draw()
+            self.round += 1
+
+        if not self.connected and self.round == 2:
+
+            #Connects to the server one time
+            if self.initial:
+                self.client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                self.client_socket.connect(('localhost',7010))
+                self.initial = not self.initial
+            
+                #Set timeout
+                self.client_socket.settimeout(0.1)
+
+            #Waiting for server to send a start signal
+            try:
+                self.signal = self.client_socket.recv(1024).decode()
+            except socket.timeout:
+
+                #If start signal received, starting actual things...
+                if self.signal == "START":
+                    self.initial = not self.initial
+            
+        elif self.round == 1:
+            self.round += 1
+        
+        elif not self.initial:
+
+            #Draw gamescreen
+            self.gamescreen.draw()
+
+            #Draw both players at position
+            self.player.draw(displayscreen)
+            self.player2.draw(displayscreen)
+
+            #This player's update
+            #self.player.update(self.gamescreen.gamewindow.left,self.gamescreen.gamewindow.right)
+
+            #Send position
+            #client_socket.sendall(f'{self.player.sprite.position.x}')
+
 if __name__ == "__main__":
     pygame.init() # Pygame Initialisation and base variable's definitions.
     width=1280
@@ -192,6 +257,7 @@ if __name__ == "__main__":
     optionsstate = False
     firsttime = True
     coopmode = False
+    onlinemode = False
     clock = pygame.time.Clock()
     while True:
         if not running and not pausestate and not gameoverstate and not optionsstate: #Creates a new game if in main menu.
@@ -223,8 +289,12 @@ if __name__ == "__main__":
                         case 1:
                             coopmode = True
                             running = True
-                            game = Game(base_width,base_height,displayscreen,True)
+                            game = Game(base_width,base_height,displayscreen,True,False)
                             #timer = pygame.time.set_timer(alaser,250)
+                        case 2:
+                            running = True
+                            onlinemode = True
+                            game = Game(base_width,base_height,displayscreen,False,True)
                 elif event.key == pygame.K_TAB and (pausestate or gameoverstate or optionsstate): #Pause Menu key checks
                     running = False
                     pausestate = False
@@ -270,9 +340,9 @@ if __name__ == "__main__":
             for i in range(len(list)):
                 text = Text(list[i].split(":")[0] + " " + (list[i].split(":")[1]).split("\n")[0],(width * 0.80,yvalues[i]),displayscreen,"blue",1,32)
                 text.draw()
-        elif running and not pausestate: #Run game each frame.
+        elif running and not pausestate and not onlinemode: #Run game each frame.
             game.run()
-        elif running:
+        elif running and onlinemode:
             #Run server communication exchanges before game.onlinerun()
             game.onlinerun() #Pass something in to online run, such as player position and update it before drawing.
         screen.blit(pygame.transform.scale(displayscreen,(screen.get_width(),screen.get_height())),(0,0)) #Scales fakesceen correctly.
